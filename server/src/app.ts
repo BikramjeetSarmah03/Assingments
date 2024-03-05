@@ -13,9 +13,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+console.log(
+  process.env.FRONTEND_CLIENT_URL || "",
+  process.env.FRONTEND_ADMIN_URL || ""
+);
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: [
+      process.env.FRONTEND_CLIENT_URL || "",
+      process.env.FRONTEND_ADMIN_URL || "",
+    ],
     credentials: true,
   })
 );

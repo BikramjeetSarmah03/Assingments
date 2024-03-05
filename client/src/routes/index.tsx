@@ -1,6 +1,6 @@
 import { Routes as RouterRoutes, Route, Navigate } from "react-router-dom";
 
-import { Home, Page404, SignIn, SignUp } from "@/pages";
+import { Home, Page404, Proposal, SignIn, SignUp } from "@/pages";
 import Layout from "@/components/layout";
 import Protected from "@/components/protected";
 
@@ -10,6 +10,7 @@ export default function Routes() {
       <Route path="/" element={<Protected />}>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="/proposal" element={<Proposal />} />
         </Route>
       </Route>
 

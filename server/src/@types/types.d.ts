@@ -1,15 +1,15 @@
-import { User as IUser } from "@prisma/client";
+import { User as IUser, Admin } from "@prisma/client";
 import { Request as ExpressRequest } from "express";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: IUser;
+      user?: IUser | Admin;
     }
-    interface User extends IUser {}
+    interface User extends IUser, Admin {}
   }
 }
 
 export interface Request extends ExpressRequest {
-  user?: User;
+  user?: User | Admin;
 }

@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
+import { isAxiosError } from "axios";
 
 import {
   Form,
@@ -14,31 +15,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
-import { isAxiosError } from "axios";
 import LoadingButton from "@/components/ui/loading-button";
-
-const signUpSchema = z
-  .object({
-    name: z.string().min(1, { message: "Please enter your name" }),
-    email: z.string().email({ message: "Please enter a valid email" }),
-    number: z
-      .string()
-      .min(10, { message: "Please enter a valid number" })
-      .max(10, { message: "Please enter a valid number" }),
-    password: z
-      .string()
-      .min(6, { message: "Password shall be more then 6 characters" }),
-    confirmPassword: z.string({
-      required_error: "Please confirm your password",
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
+import { useAuth } from "@/hooks/useAuth";
+import { signUpSchema } from "@/lib/form-schemas";
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const { setIsAuth } = useAuth();
 
   const form = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
@@ -58,10 +41,12 @@ export default function SignUp() {
       if (res.data.success) {
         toast.success("Signed Up Successfully");
         navigate("/");
+        setIsAuth(true, res.data.user);
       } else {
         throw Error("Error While Signing Up");
       }
     } catch (error) {
+      setIsAuth(false, null);
       if (isAxiosError(error)) {
         toast.error(error.response?.data?.message);
       } else {

@@ -1,11 +1,11 @@
 import { CookieOptions, Response } from "express";
-import { User } from "@prisma/client";
+import { Admin, User } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 
 export const sendToken = (
   res: Response,
-  user: User,
+  user: User | Admin,
   statusCode: StatusCodes
 ) => {
   const token = jwt.sign(

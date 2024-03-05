@@ -2,10 +2,10 @@ import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import bcryptjs from "bcryptjs";
 
-import catchAsyncErrors from "../middlewares/catchAsyncErrors";
-import { sendToken, validEmail } from "../utils";
-import ErrorHandler from "../utils/errorHandler";
-import { db } from "../config/db";
+import catchAsyncErrors from "../../middlewares/catchAsyncErrors";
+import { sendToken, validEmail } from "../../utils";
+import ErrorHandler from "../../utils/errorHandler";
+import { db } from "../../config/db";
 
 export const registerUser = catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {

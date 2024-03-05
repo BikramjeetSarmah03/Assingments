@@ -1,6 +1,6 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL + "/api/v1",
+  baseURL: import.meta.env.VITE_BACKEND_URL + "/api/v1" + "/user",
   withCredentials: true,
 });

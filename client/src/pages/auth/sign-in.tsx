@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { toast } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
+import { isAxiosError } from "axios";
 
 import {
   Form,
@@ -14,17 +14,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
-import { isAxiosError } from "axios";
 import LoadingButton from "@/components/ui/loading-button";
+import { useAuth } from "@/hooks/useAuth";
+import { signInSchema } from "@/lib/form-schemas";
+import { z } from "zod";
 
-const signInSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email" }),
-  password: z
-    .string()
-    .min(6, { message: "Password shall be more then 6 characters" }),
-});
 export default function SignIn() {
   const navigate = useNavigate();
+  const { setIsAuth } = useAuth();
 
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -41,10 +38,12 @@ export default function SignIn() {
       if (res.data.success) {
         toast.success("Logged In Successfully");
         navigate("/");
+        setIsAuth(true, res.data.user);
       } else {
         throw Error("Error While Logging In");
       }
     } catch (error) {
+      setIsAuth(false, null);
       if (isAxiosError(error)) {
         toast.error(error.response?.data?.message);
       } else {

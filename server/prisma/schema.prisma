@@ -7,9 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ROLE {
-  USER
-  ADMIN
+enum LandType {
+  AGRICULTURAL
+  RESENDITIAL
+  COMMERCIAL
+  OTHER
+}
+
+enum ProposalStatus {
+  APPROVED
+  PENDING
+  REJECTED
 }
 
 model User {
@@ -19,10 +27,108 @@ model User {
   number   String  @unique
   password String
   salt     String
-  role     ROLE    @default(USER)
+
+  proposals Proposal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
 
   @@map("users")
+}
+
+model Admin {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name     String?
+  email    String  @unique
+  number   String
+  username String  @unique
+  password String
+  salt     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  @@map("admins")
+}
+
+model Proposal {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  title       String
+  description String?
+  objective   String
+  duration    String
+  budget      Int
+
+  address       Address
+  bankDetails   BankDetails
+  incomeDetails IncomeDetails
+  landDetails   LandDetails
+  documents     Documents
+
+  approved Boolean
+  status   ProposalStatus @default(PENDING)
+
+  comment           String?
+  highlightedFields String[]
+
+  remarks String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String? @db.ObjectId
+
+  @@map("proposals")
+}
+
+type Address {
+  state         String
+  district      String
+  postOffice    String
+  policeStation String
+  pincode       String
+  address       String
+}
+
+type BankDetails {
+  bankName      String
+  ifsc          String
+  accountNumber String
+  branch        String
+}
+
+type IncomeDetails {
+  source String
+  amount String
+}
+
+type LandDetails {
+  ownerName   String
+  ownerNumber String
+  ownerEmail  String
+  location    String
+  area        String
+
+  type LandType
+
+  usage           String
+  ownershipStatus String
+  description     String?
+}
+
+type Documents {
+  photo        String
+  addressProof String
+  incomeProof  String
+}
+
+type VerificationComments {
+  comment          String
+  modifiedBy       String
+  modifiedRole     String
+  status           String
+  modificationDate DateTime
 }

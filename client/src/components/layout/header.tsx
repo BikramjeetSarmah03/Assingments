@@ -41,10 +41,22 @@ export default function Header() {
     <header className="flex items-center justify-between p-4 border-b shadow">
       <h1>PMS</h1>
 
+      <div className="flex items-center gap-4">
+        <Link to={"/"} className={buttonVariants({ variant: "outline" })}>
+          Home
+        </Link>
+
+        <Link to={"/proposal"} className={buttonVariants()}>
+          Add Proposal
+        </Link>
+      </div>
+
       {isAuth && user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">{user.name}</Button>
+            <Button variant="outline">
+              <h1>{user.name}</h1>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-40">
             <DropdownMenuItem>
