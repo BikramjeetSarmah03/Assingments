@@ -59,7 +59,7 @@ model Proposal {
   description String?
   objective   String
   duration    String
-  budget      Int
+  budget      String
 
   address       Address
   bankDetails   BankDetails
@@ -67,7 +67,7 @@ model Proposal {
   landDetails   LandDetails
   documents     Documents
 
-  approved Boolean
+  approved Boolean        @default(false)
   status   ProposalStatus @default(PENDING)
 
   comment           String?
@@ -78,8 +78,8 @@ model Proposal {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
 
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String? @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.ObjectId
 
   @@map("proposals")
 }

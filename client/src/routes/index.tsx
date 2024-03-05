@@ -11,6 +11,7 @@ export default function Routes() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="/proposal" element={<Proposal />} />
+          <Route path="/proposal/:id" element={<Proposal />} />
         </Route>
       </Route>
 

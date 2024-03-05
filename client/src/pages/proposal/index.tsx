@@ -26,6 +26,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import LoadingButton from "@/components/ui/loading-button";
+import toast from "react-hot-toast";
+import { isAxiosError } from "axios";
+import { api } from "@/lib/api";
 
 export default function Proposal() {
   const navigate = useNavigate();
@@ -63,8 +66,20 @@ export default function Proposal() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof proposalSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof proposalSchema>) {
+    try {
+      const res = await api.post("/proposal", { ...values });
+
+      if (!res.data.success) throw new Error("Error while submitting proposal");
+
+      toast.success("Proposal Submitted Successfully");
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data.message);
+      } else {
+        toast.error("Error while submitting proposal");
+      }
+    }
   }
 
   return (
