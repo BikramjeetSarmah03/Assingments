@@ -6,7 +6,7 @@ import ErrorHandler from "../utils/errorHandler";
 import { db } from "../config/db";
 import { Request } from "../@types/types";
 
-export const isAuthenticatedUser = async (
+export const isAuthenticated = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -37,33 +37,17 @@ export const isAuthenticatedUser = async (
   }
 };
 
-export const isAuthenticatedAdmin = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { token } = req.cookies;
-
-  if (!token)
-    return next(new ErrorHandler("Token not found", StatusCodes.UNAUTHORIZED));
-
-  try {
-    const decodedToken: any = jwt.verify(token, process.env.JWT_SECRET || "");
-
-    if (!decodedToken)
-      return next(new ErrorHandler("Invalid token", StatusCodes.UNAUTHORIZED));
-
-    const user = await db.admin.findUnique({
-      where: {
-        id: decodedToken.id,
-      },
-    });
-
-    req.user = user as any;
+export const authorizeRoles = (...roles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ErrorHandler(
+          `Role: ${req.user.role} is not allowed to access this resouce `,
+          403
+        )
+      );
+    }
 
     next();
-  } catch (error) {
-    console.log(error);
-    return next(new ErrorHandler("Token Expired", StatusCodes.UNAUTHORIZED));
-  }
+  };
 };

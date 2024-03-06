@@ -16,7 +16,7 @@ import {
 import { proposalSchema } from "@/lib/form-schemas";
 import { Textarea } from "@/components/ui/textarea";
 import { ChevronLeftIcon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -29,9 +29,67 @@ import LoadingButton from "@/components/ui/loading-button";
 import toast from "react-hot-toast";
 import { isAxiosError } from "axios";
 import { api } from "@/lib/api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getSingleProposal } from "@/services/proposal";
+import FullScreenLoader from "@/components/layout/full-screen-loader";
+import { useState } from "react";
 
 export default function Proposal() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const params = useParams();
+
+  const [rejectedFields, setRejectedFields] = useState<string[]>([]);
+  // TODO: Make the rejected thing work
+
+  const getProposal = useQuery({
+    queryKey: ["getProposal"],
+    queryFn: async () => {
+      const resData = await getSingleProposal(params.id as string);
+
+      form.reset({
+        title: resData.proposal.title || "",
+        description: resData.proposal.description || "",
+        budget: resData.proposal.budget || "",
+        duration: resData.proposal.duration || "",
+        objective: resData.proposal.objective || "",
+        state: resData.proposal.address.state || "",
+        district: resData.proposal.address.district || "",
+        pincode: resData.proposal.address.pincode || "",
+        postOffice: resData.proposal.address.postOffice || "",
+        policeStation: resData.proposal.address.policeStation || "",
+        address: resData.proposal.address.address || "",
+        bankName: resData.proposal.bankDetails.bankName || "",
+        ifsc: resData.proposal.bankDetails.ifsc || "",
+        accountNumber: resData.proposal.bankDetails.accountNumber || "",
+        bankBranch: resData.proposal.bankDetails.bankBranch || "",
+        incomeSource: resData.proposal.incomeDetails.source || "",
+        incomeAmount: resData.proposal.incomeDetails.amount || "",
+        ownerName: resData.proposal.landDetails.ownerName || "",
+        ownerNumber: resData.proposal.landDetails.ownerNumber || "",
+        ownerEmail: resData.proposal.landDetails.ownerEmail || "",
+        landLocation: resData.proposal.landDetails.location || "",
+        landArea: resData.proposal.landDetails.area || "",
+        landType: resData.proposal.landDetails.type || "",
+        usage: resData.proposal.landDetails.usage || "",
+        ownershipStatus: resData.proposal.landDetails.ownershipStatus || "",
+        landDescription: resData.proposal.landDetails.description || "",
+        remarks: resData.proposal.remarks || "",
+      });
+
+      setRejectedFields(resData.proposal.highlightedFields);
+
+      return resData;
+    },
+    enabled: !!params.id,
+  });
+
+  getProposal.isLoading ? <FullScreenLoader /> : null;
+  getProposal.error ? (
+    <div className="flex items-center justify-center h-full">
+      Error : {getProposal.error?.message}
+    </div>
+  ) : null;
 
   const form = useForm<z.infer<typeof proposalSchema>>({
     resolver: zodResolver(proposalSchema),
@@ -72,6 +130,7 @@ export default function Proposal() {
 
       if (!res.data.success) throw new Error("Error while submitting proposal");
 
+      queryClient.invalidateQueries({ queryKey: ["proposals"] });
       toast.success("Proposal Submitted Successfully");
     } catch (error) {
       if (isAxiosError(error)) {

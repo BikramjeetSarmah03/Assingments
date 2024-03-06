@@ -2,10 +2,10 @@ import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import bcryptjs from "bcryptjs";
 
-import catchAsyncErrors from "../../middlewares/catchAsyncErrors";
-import { sendToken, validEmail } from "../../utils";
-import ErrorHandler from "../../utils/errorHandler";
-import { db } from "../../config/db";
+import catchAsyncErrors from "../middlewares/catchAsyncErrors";
+import { sendToken, validEmail } from "../utils";
+import ErrorHandler from "../utils/errorHandler";
+import { db } from "../config/db";
 
 export const registerUser = catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -40,6 +40,7 @@ export const registerUser = catchAsyncErrors(
     const user = await db.user.create({
       data: {
         name,
+        username: name?.toLowerCase().trim().replace(" ", "_"),
         email,
         number,
         password: hashPassword,
@@ -64,6 +65,35 @@ export const loginUser = catchAsyncErrors(
     const isUser = await db.user.findUnique({
       where: {
         email,
+      },
+    });
+
+    if (!isUser)
+      return next(
+        new ErrorHandler("Invalid Email or Password", StatusCodes.UNAUTHORIZED)
+      );
+
+    const comparePassword = await bcryptjs.compare(password, isUser.password);
+
+    if (!comparePassword)
+      return next(
+        new ErrorHandler("Invalid Email or Passsword", StatusCodes.UNAUTHORIZED)
+      );
+
+    sendToken(res, isUser, StatusCodes.ACCEPTED);
+  }
+);
+
+export const loginAdmin = catchAsyncErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { username, password } = req.body;
+
+    const isUser = await db.user.findUnique({
+      where: {
+        username,
+        AND: {
+          role: "ADMIN",
+        },
       },
     });
 

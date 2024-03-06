@@ -33,7 +33,7 @@ export default function SignIn() {
 
   async function onSubmit(values: z.infer<typeof signInSchema>) {
     try {
-      const res = await api.post("/auth/sign-in", { ...values });
+      const res = await api.post("/auth/user/sign-in", { ...values });
 
       if (res.data.success) {
         toast.success("Logged In Successfully");

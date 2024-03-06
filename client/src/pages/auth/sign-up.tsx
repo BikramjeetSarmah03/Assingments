@@ -36,7 +36,7 @@ export default function SignUp() {
 
   async function onSubmit(values: z.infer<typeof signUpSchema>) {
     try {
-      const res = await api.post("/auth/sign-up", { ...values });
+      const res = await api.post("/auth/user/sign-up", { ...values });
 
       if (res.data.success) {
         toast.success("Signed Up Successfully");

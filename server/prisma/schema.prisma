@@ -20,6 +20,11 @@ enum ProposalStatus {
   REJECTED
 }
 
+enum ROLE {
+  ADMIN
+  USER
+}
+
 model User {
   id       String  @id @default(auto()) @map("_id") @db.ObjectId
   name     String?
@@ -27,6 +32,9 @@ model User {
   number   String  @unique
   password String
   salt     String
+  username String  @unique
+
+  role ROLE @default(USER)
 
   proposals Proposal[]
 
@@ -34,22 +42,6 @@ model User {
   updatedAt DateTime @updatedAt()
 
   @@map("users")
-}
-
-model Admin {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  name     String?
-  email    String  @unique
-  number   String
-  username String  @unique
-  password String
-  salt     String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
-
-  @@map("admins")
 }
 
 model Proposal {
@@ -70,7 +62,9 @@ model Proposal {
   approved Boolean        @default(false)
   status   ProposalStatus @default(PENDING)
 
-  comment           String?
+  deleteEnable Boolean @default(false)
+  editEnable   Boolean @default(false)
+
   highlightedFields String[]
 
   remarks String?

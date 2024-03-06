@@ -1,10 +1,11 @@
 import express from "express";
-import userRoutes from "./user";
-import adminRoutes from "./admin";
+import authRoutes from "./auth.routes";
+import proposalRoutes from "./proposal.routes";
+import { isAuthenticated } from "../middlewares";
 
 const router = express.Router();
 
-router.use("/api/v1/user", userRoutes);
-router.use("/api/v1/admin", adminRoutes);
+router.use("/api/v1/auth", authRoutes);
+router.use("/api/v1/proposal", isAuthenticated, proposalRoutes);
 
 export default router;

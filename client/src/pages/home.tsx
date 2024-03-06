@@ -1,47 +1,32 @@
 import DataTable from "@/components/ui/data-table";
-import { api } from "@/lib/api";
 import { proposalTableColumns } from "@/lib/tableColumns";
+import { getProposals } from "@/services/proposal";
+import { useQuery } from "@tanstack/react-query";
 import { LoaderIcon } from "lucide-react";
-import { useMemo, useState } from "react";
 
 export default function Home() {
-  const [proposals, setProposals] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  useMemo(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const res = await api.get("/proposal");
-
-        if (!res.data.success) throw Error("Error while getting proposals");
-
-        setProposals(res.data?.proposals);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+  const { isPending, error, data } = useQuery({
+    queryKey: ["proposals"],
+    queryFn: getProposals,
+  });
 
   return (
     <div className="h-full">
-      {loading ? (
+      {isPending ? (
         <div className="flex items-center justify-center h-full">
           <LoaderIcon className="animate-spin" />
         </div>
-      ) : proposals.length ? (
+      ) : data.success ? (
         <div className="mx-4">
           <DataTable
-            data={proposals}
+            data={data.proposals}
             columns={proposalTableColumns}
             columnsShow={false}
             showAdd
           />
         </div>
       ) : (
-        <p>Error While Rendering Proposals</p>
+        <p>Error While Rendering Proposals: {error?.message}</p>
       )}
     </div>
   );
