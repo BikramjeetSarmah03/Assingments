@@ -1,7 +1,7 @@
 import { api } from "@/lib/api";
 
-export const getProposals = async () => {
-  const { data } = await api.get("/proposal");
+export const getDashboardData = async () => {
+  const { data } = await api.get("/user/dashboard");
 
   return data;
 };

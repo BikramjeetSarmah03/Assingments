@@ -33,6 +33,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSingleProposal } from "@/services/proposal";
 import FullScreenLoader from "@/components/layout/full-screen-loader";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 export default function Proposal() {
   const navigate = useNavigate();
@@ -40,7 +41,6 @@ export default function Proposal() {
   const params = useParams();
 
   const [rejectedFields, setRejectedFields] = useState<string[]>([]);
-  // TODO: Make the rejected thing work
 
   const getProposal = useQuery({
     queryKey: ["getProposal"],
@@ -126,9 +126,18 @@ export default function Proposal() {
 
   async function onSubmit(values: z.infer<typeof proposalSchema>) {
     try {
-      const res = await api.post("/proposal", { ...values });
-
-      if (!res.data.success) throw new Error("Error while submitting proposal");
+      if (getProposal.data.proposal.editEnable) {
+        const res = await api.post(`/proposal/${params.id}`, {
+          ...values,
+          rejectedFields,
+        });
+        if (!res.data.success)
+          throw new Error("Error while submitting proposal");
+      } else {
+        const res = await api.post("/proposal", { ...values });
+        if (!res.data.success)
+          throw new Error("Error while submitting proposal");
+      }
 
       queryClient.invalidateQueries({ queryKey: ["proposals"] });
       toast.success("Proposal Submitted Successfully");
@@ -140,6 +149,10 @@ export default function Proposal() {
       }
     }
   }
+
+  const isHighlighted = (name: string) => {
+    return rejectedFields.includes(name);
+  };
 
   return (
     <div className="pb-10 bg-gray-100">
@@ -161,13 +174,19 @@ export default function Proposal() {
             className="mt-4 space-y-4">
             <div>
               <h1 className="font-serif text-xl">Proposal Details</h1>
-              <div className="p-4 bg-white border">
+              <div className="p-4 space-y-4 bg-white border">
                 <FormField
                   control={form.control}
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Title</FormLabel>
+                      <FormLabel
+                        className={cn(
+                          isHighlighted(field.name) &&
+                            "bg-red-500 p-2 px-8 text-white font-bold"
+                        )}>
+                        Title
+                      </FormLabel>
                       <FormControl>
                         <Input placeholder="Proposal Title" {...field} />
                       </FormControl>
@@ -181,7 +200,13 @@ export default function Proposal() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel
+                        className={cn(
+                          isHighlighted(field.name) &&
+                            "bg-red-500 p-2 px-8 text-white font-bold"
+                        )}>
+                        Description
+                      </FormLabel>
                       <FormControl>
                         <Textarea
                           onChange={field.onChange}
@@ -200,7 +225,13 @@ export default function Proposal() {
                     name="objective"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel>Objective</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Objective
+                        </FormLabel>
                         <FormControl>
                           <Input placeholder="Proposal Objective" {...field} />
                         </FormControl>
@@ -214,7 +245,13 @@ export default function Proposal() {
                     name="duration"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel>Duration</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Duration
+                        </FormLabel>
                         <FormControl>
                           <Input
                             placeholder="Please enter duration"
@@ -231,7 +268,13 @@ export default function Proposal() {
                     name="budget"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel>Budget</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Budget
+                        </FormLabel>
                         <FormControl>
                           <Input placeholder="Please enter budget" {...field} />
                         </FormControl>
@@ -245,14 +288,20 @@ export default function Proposal() {
 
             <div>
               <h1 className="font-serif text-xl">Address Details</h1>
-              <div className="p-4 bg-white border">
+              <div className="p-4 space-y-4 bg-white border">
                 <div className="flex items-center gap-4">
                   <FormField
                     control={form.control}
                     name="state"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="state">State</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          State
+                        </FormLabel>
                         <FormControl>
                           <Input
                             id="state"
@@ -270,7 +319,13 @@ export default function Proposal() {
                     name="district"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="district">District</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          District
+                        </FormLabel>
                         <FormControl>
                           <Input
                             id="district"
@@ -288,7 +343,13 @@ export default function Proposal() {
                     name="pincode"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="pincode">Pincode</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Pincode
+                        </FormLabel>
                         <FormControl>
                           <Input
                             id="pincode"
@@ -308,7 +369,13 @@ export default function Proposal() {
                     name="postOffice"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="postOffice">Post Office</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Post Office
+                        </FormLabel>
                         <FormControl>
                           <Input
                             id="postOffice"
@@ -326,7 +393,11 @@ export default function Proposal() {
                     name="policeStation"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="policeStation">
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
                           Police Station
                         </FormLabel>
                         <FormControl>
@@ -347,7 +418,13 @@ export default function Proposal() {
                   name="address"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel htmlFor="address">Address</FormLabel>
+                      <FormLabel
+                        className={cn(
+                          isHighlighted(field.name) &&
+                            "bg-red-500 p-2 px-8 text-white font-bold"
+                        )}>
+                        Address
+                      </FormLabel>
                       <FormControl>
                         <Input
                           id="address"
@@ -364,14 +441,20 @@ export default function Proposal() {
 
             <div>
               <h1 className="font-serif text-xl">Bank Details</h1>
-              <div className="p-4 bg-white border">
+              <div className="p-4 space-y-4 bg-white border">
                 <div className="flex items-center gap-4">
                   <FormField
                     control={form.control}
                     name="bankName"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="bankName">Bank Name</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Bank Name
+                        </FormLabel>
                         <FormControl>
                           <Input
                             id="bankName"
@@ -389,7 +472,13 @@ export default function Proposal() {
                     name="bankBranch"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="bankBranch">Bank Branch</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Bank Branch
+                        </FormLabel>
                         <FormControl>
                           <Input
                             id="bankBranch"
@@ -409,7 +498,13 @@ export default function Proposal() {
                     name="ifsc"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="ifsc">Bank IFSC</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Bank IFSC
+                        </FormLabel>
                         <FormControl>
                           <Input
                             id="ifsc"
@@ -427,7 +522,11 @@ export default function Proposal() {
                     name="accountNumber"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="accountNumber">
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
                           Account Number
                         </FormLabel>
                         <FormControl>
@@ -447,14 +546,18 @@ export default function Proposal() {
 
             <div>
               <h1 className="font-serif text-xl">Income Details</h1>
-              <div className="p-4 bg-white border">
+              <div className="p-4 space-y-4 bg-white border">
                 <div className="flex items-center gap-4">
                   <FormField
                     control={form.control}
                     name="incomeAmount"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="incomeAmount">
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
                           Income Amount
                         </FormLabel>
                         <FormControl>
@@ -474,7 +577,11 @@ export default function Proposal() {
                     name="incomeSource"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="incomeSource">
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
                           Income Source
                         </FormLabel>
                         <FormControl>
@@ -494,14 +601,20 @@ export default function Proposal() {
 
             <div>
               <h1 className="font-serif text-xl">Land Details</h1>
-              <div className="p-4 bg-white border">
+              <div className="p-4 space-y-4 bg-white border">
                 <div className="flex items-center gap-4">
                   <FormField
                     control={form.control}
                     name="ownerName"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="ownerName">Owner Name</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Owner Name
+                        </FormLabel>
                         <FormControl>
                           <Input
                             id="ownerName"
@@ -519,7 +632,11 @@ export default function Proposal() {
                     name="ownerNumber"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="ownerNumber">
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
                           Owner Number
                         </FormLabel>
                         <FormControl>
@@ -539,7 +656,13 @@ export default function Proposal() {
                     name="ownerEmail"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="ownerEmail">Owner Email</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Owner Email
+                        </FormLabel>
                         <FormControl>
                           <Input
                             id="ownerEmail"
@@ -559,7 +682,11 @@ export default function Proposal() {
                     name="landLocation"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="landLocation">
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
                           Land Location
                         </FormLabel>
                         <FormControl>
@@ -579,7 +706,13 @@ export default function Proposal() {
                     name="landArea"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="landArea">Land Area</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Land Area
+                        </FormLabel>
                         <FormControl>
                           <Input
                             id="landArea"
@@ -598,7 +731,13 @@ export default function Proposal() {
                     name="landType"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="landType">Land Type</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Land Type
+                        </FormLabel>
                         <FormControl>
                           <Select
                             value={field.value}
@@ -632,7 +771,13 @@ export default function Proposal() {
                     name="usage"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="usage">Land Usage</FormLabel>
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
+                          Land Usage
+                        </FormLabel>
                         <FormControl>
                           <Input
                             id="usage"
@@ -650,7 +795,11 @@ export default function Proposal() {
                     name="ownershipStatus"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel htmlFor="ownershipStatus">
+                        <FormLabel
+                          className={cn(
+                            isHighlighted(field.name) &&
+                              "bg-red-500 p-2 px-8 text-white font-bold"
+                          )}>
                           Land Ownership Status
                         </FormLabel>
                         <FormControl>
@@ -670,7 +819,11 @@ export default function Proposal() {
                   name="landDescription"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel htmlFor="landDescription">
+                      <FormLabel
+                        className={cn(
+                          isHighlighted(field.name) &&
+                            "bg-red-500 p-2 px-8 text-white font-bold"
+                        )}>
                         Land Description
                       </FormLabel>
                       <FormControl>
@@ -693,7 +846,13 @@ export default function Proposal() {
                 name="remarks"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel htmlFor="remarks">Remarks</FormLabel>
+                    <FormLabel
+                      className={cn(
+                        isHighlighted(field.name) &&
+                          "bg-red-500 p-2 px-8 text-white font-bold"
+                      )}>
+                      Remarks
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         id="remarks"
@@ -710,7 +869,8 @@ export default function Proposal() {
             <LoadingButton
               loading={form.formState.isSubmitting}
               type="submit"
-              className="w-full">
+              className="w-full"
+              disabled={!form.formState.isDirty}>
               Submit Proposal
             </LoadingButton>
           </form>
