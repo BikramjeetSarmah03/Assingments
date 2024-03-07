@@ -108,7 +108,7 @@ export const proposalTableColumns: ColumnDef<any, any>[] = [
             throw new Error("Error while deleting proposal");
 
           queryClient.invalidateQueries({
-            queryKey: ["proposals"],
+            queryKey: ["dashboard"],
           });
           toast.success("Proposal Deleted successfully");
         } catch (error) {

@@ -195,7 +195,7 @@ export default function Proposal() {
           throw new Error("Error while submitting proposal");
       }
 
-      queryClient.invalidateQueries({ queryKey: ["proposals"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       toast.success("Proposal Submitted Successfully");
     } catch (error) {
       if (isAxiosError(error)) {

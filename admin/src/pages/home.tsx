@@ -11,7 +11,7 @@ export default function Home() {
   const { onOpen } = useModal();
 
   const { isLoading, error, data } = useQuery({
-    queryKey: ["proposals"],
+    queryKey: ["dashboard"],
     queryFn: getDashboardData,
   });
 
@@ -35,33 +35,33 @@ export default function Home() {
   ) : (
     <div className="h-full">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
-        <div className="p-4 m-4 space-y-2 text-white border shadow bg-gradient-to-br from-blue-800 to-blue-500">
+        <div className="p-4 m-4 space-y-2 text-white bg-blue-500 border shadow">
           <h1 className="text-lg font-semibold">Total Users</h1>
           <p className="text-2xl font-black">{data.totalUsers || 0}</p>
         </div>
-        <div className="p-4 m-4 space-y-2 text-white border shadow bg-gradient-to-bl from-orange-800 to-orange-500">
+        <div className="p-4 m-4 space-y-2 text-white bg-orange-500 border shadow">
           <h1 className="text-lg font-semibold">Total Proposals</h1>
           <p className="text-2xl font-black">{data.totalProposals || 0}</p>
         </div>
-        <div className="p-4 m-4 space-y-2 text-white border shadow bg-gradient-to-br from-yellow-600 to-yellow-500">
+        <div className="p-4 m-4 space-y-2 text-white bg-yellow-500 border shadow">
           <h1 className="text-lg font-semibold">Pending Proposals</h1>
           <p className="text-2xl font-black">
             {data.pendingProposals.length || 0}
           </p>
         </div>
-        <div className="p-4 m-4 space-y-2 text-white border shadow bg-gradient-to-bl from-green-800 to-green-500">
+        <div className="p-4 m-4 space-y-2 text-white bg-green-500 border shadow">
           <h1 className="text-lg font-semibold">Approved Proposals</h1>
           <p className="text-2xl font-black">
             {data.approvedProposals.length || 0}
           </p>
         </div>
-        <div className="p-4 m-4 space-y-2 text-white border shadow bg-gradient-to-br from-red-800 to-red-500">
+        <div className="p-4 m-4 space-y-2 text-white bg-red-500 border shadow">
           <h1 className="text-lg font-semibold">Rejected Proposals</h1>
           <p className="text-2xl font-black">
             {data.rejectedProposals.length || 0}
           </p>
         </div>
-        <div className="p-4 m-4 space-y-2 text-white border shadow bg-gradient-to-br from-pink-800 to-pink-500">
+        <div className="p-4 m-4 space-y-2 text-white bg-pink-500 border shadow">
           <h1 className="text-lg font-semibold">Meetings</h1>
           <div className="flex items-center justify-between">
             <p className="text-2xl font-black">0</p>

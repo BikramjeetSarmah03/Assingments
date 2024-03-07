@@ -4,6 +4,7 @@ import { authorizeRoles, isAuthenticated } from "../middlewares";
 import {
   getAdminDashboard,
   getUserDashboard,
+  getAllUsers,
 } from "../controllers/dashboard.controllers";
 import { ROLE } from "@prisma/client";
 
@@ -21,5 +22,6 @@ router.get(
   authorizeRoles(ROLE.USER),
   getUserDashboard
 );
+router.get("/users", isAuthenticated, authorizeRoles(ROLE.ADMIN), getAllUsers);
 
 export default router;

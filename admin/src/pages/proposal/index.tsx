@@ -141,7 +141,7 @@ export default function Proposal() {
 
       if (!res.data.success) throw new Error("Error while updating status");
 
-      queryClient.invalidateQueries({ queryKey: ["proposals"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       toast.success("Proposal Status Updated Successfully");
     } catch (error) {
       if (isAxiosError(error)) {

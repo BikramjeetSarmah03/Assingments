@@ -64,3 +64,17 @@ export const getUserDashboard = catchAsyncErrors(
     });
   }
 );
+export const getAllUsers = catchAsyncErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const users = await db.user.findMany({
+      where: {
+        role: "USER",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      users,
+    });
+  }
+);
