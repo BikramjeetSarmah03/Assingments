@@ -78,6 +78,21 @@ model Proposal {
   @@map("proposals")
 }
 
+model Meeting {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  recieverEmail   String
+  senderEmail     String
+  meetingLink     String
+  meetingDate     String
+  meetingDuration String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  @@map("meetings")
+}
+
 type Address {
   state         String
   district      String

@@ -25,6 +25,7 @@ export function MeetingModal() {
   const [formData, setFormData] = useState({
     id: "",
     email: "",
+    date: "",
     time: "",
   });
 
@@ -45,10 +46,13 @@ export function MeetingModal() {
     });
   };
 
-  const handleTime = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = event.target;
     setFormData({
       ...formData,
-      time: event.target.value,
+      [name]: value,
     });
   };
 
@@ -56,7 +60,9 @@ export function MeetingModal() {
     event.preventDefault();
 
     if (formData.id === "") return toast.error("Please select an user");
-    if (formData.time === "") return toast.error("Please select an time");
+    if (formData.date === "") return toast.error("Please select an date");
+    if (formData.time === "")
+      return toast.error("Please select duration of the meeting");
 
     try {
       setLoading(true);
@@ -115,8 +121,27 @@ export function MeetingModal() {
           </div>
 
           <div>
-            <Label htmlFor="dateTime">Select Date and Time</Label>
-            <Input id="dateTime" type="datetime-local" onChange={handleTime} />
+            <Label htmlFor="date">Select Date and Time</Label>
+            <Input
+              id="date"
+              name="date"
+              type="date"
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="time">Select Duration</Label>
+            <select
+              name="time"
+              id="time"
+              className="p-2 bg-white border rounded-md"
+              onChange={handleInputChange}>
+              <option value="">Duration</option>
+              <option value="15">15 min</option>
+              <option value="30">30 min</option>
+              <option value="45">45 min</option>
+              <option value="60">1 hr</option>
+            </select>
           </div>
 
           <LoadingButton loading={loading} type="submit" className="w-full">
