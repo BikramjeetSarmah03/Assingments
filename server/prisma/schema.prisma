@@ -114,9 +114,14 @@ type LandDetails {
 }
 
 type Documents {
-  photo        String
-  addressProof String
-  incomeProof  String
+  photo        Image
+  addressProof Image
+  incomeProof  Image
+}
+
+type Image {
+  public_id  String
+  secure_url String
 }
 
 type VerificationComments {

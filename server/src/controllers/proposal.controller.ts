@@ -4,6 +4,8 @@ import catchAsyncErrors from "../middlewares/catchAsyncErrors";
 import { db } from "../config/db";
 import { ROLE } from "@prisma/client";
 import ErrorHandler from "../utils/errorHandler";
+import { deleteFile, uploadFile } from "../utils/cloudinary";
+import { removeFileFromDisk } from "../utils/multer";
 
 export const createProposal = catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -74,19 +76,68 @@ export const createProposal = catchAsyncErrors(
           usage,
         },
         documents: {
-          addressProof: "",
-          incomeProof: "",
-          photo: "",
+          photo: { public_id: "", secure_url: "" },
+          addressProof: { public_id: "", secure_url: "" },
+          incomeProof: { public_id: "", secure_url: "" },
         },
         remarks,
         userId: req.user.id,
       },
     });
 
+    const files = req.files as any[];
+    let imageUrls = [{ public_id: "", secure_url: "" }];
+
+    if (!files?.length)
+      return next(new ErrorHandler("Please send the files", 400));
+
+    try {
+      await Promise.all(
+        files.map(async (file) => {
+          const res = await uploadFile(
+            file.path,
+            `${req.user.id}/${proposal.id}`
+          );
+
+          if (!res) {
+            throw new ErrorHandler("Error while uploading files", 500);
+          }
+
+          imageUrls.push({
+            public_id: res.public_id,
+            secure_url: res.secure_url,
+          });
+
+          await removeFileFromDisk(file.path);
+        })
+      );
+    } catch (error) {
+      console.error(error);
+
+      imageUrls.map(async (url) => {
+        await deleteFile(url.public_id);
+        return;
+      });
+      return new ErrorHandler("Error while processing files", 500);
+    }
+
+    const finalProposal = await db.proposal.update({
+      where: {
+        id: proposal.id,
+      },
+      data: {
+        documents: {
+          photo: imageUrls[3],
+          addressProof: imageUrls[2],
+          incomeProof: imageUrls[1],
+        },
+      },
+    });
+
     res.status(201).json({
       success: true,
       message: "Proposal Added",
-      proposal,
+      proposal: finalProposal,
     });
   }
 );

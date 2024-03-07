@@ -15,8 +15,8 @@ import {
 
 import { proposalSchema } from "@/lib/form-schemas";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeftIcon } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { ChevronLeftIcon, EyeIcon } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -34,6 +34,8 @@ import { getSingleProposal } from "@/services/proposal";
 import FullScreenLoader from "@/components/layout/full-screen-loader";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { FileInput } from "@/components/ui/file-input";
+import { Label } from "@/components/ui/label";
 
 export default function Proposal() {
   const navigate = useNavigate();
@@ -41,6 +43,11 @@ export default function Proposal() {
   const params = useParams();
 
   const [rejectedFields, setRejectedFields] = useState<string[]>([]);
+  const [images, setImages] = useState({
+    photo: "",
+    addressProof: "",
+    incomeProof: "",
+  });
 
   const getProposal = useQuery({
     queryKey: ["getProposal"],
@@ -126,7 +133,7 @@ export default function Proposal() {
 
   async function onSubmit(values: z.infer<typeof proposalSchema>) {
     try {
-      if (getProposal.data.proposal.editEnable) {
+      if (getProposal.data && getProposal.data.proposal.editEnable) {
         const res = await api.post(`/proposal/${params.id}`, {
           ...values,
           rejectedFields,
@@ -134,7 +141,56 @@ export default function Proposal() {
         if (!res.data.success)
           throw new Error("Error while submitting proposal");
       } else {
-        const res = await api.post("/proposal", { ...values });
+        if (images.photo === "") return toast.error("Please select an photo");
+        if (images.addressProof === "")
+          return toast.error("Please select an address proof");
+        if (images.incomeProof === "")
+          return toast.error("Please select an income proof");
+
+        const formData = new FormData();
+
+        formData.append("title", values.title);
+        formData.append("description", values.description);
+        formData.append("objective", values.objective);
+        formData.append("duration", values.duration);
+        formData.append("budget", values.budget);
+
+        formData.append("state", values.state);
+        formData.append("district", values.district);
+        formData.append("pincode", values.pincode);
+        formData.append("postOffice", values.postOffice);
+        formData.append("policeStation", values.policeStation);
+        formData.append("address", values.address);
+
+        formData.append("bankName", values.bankName);
+        formData.append("bankBranch", values.bankBranch);
+        formData.append("ifsc", values.ifsc);
+        formData.append("accountNumber", values.accountNumber);
+
+        formData.append("incomeAmount", values.incomeAmount);
+        formData.append("incomeSource", values.incomeSource);
+
+        formData.append("ownerName", values.ownerName);
+        formData.append("ownerNumber", values.ownerNumber);
+        formData.append("ownerEmail", values.ownerEmail);
+        formData.append("landLocation", values.landLocation);
+        formData.append("landArea", values.landArea);
+        formData.append("landType", values.landType);
+        formData.append("usage", values.usage);
+        formData.append("ownershipStatus", values.ownershipStatus);
+        formData.append("landDescription", values.landDescription);
+
+        formData.append("file", images.photo);
+        formData.append("file", images.addressProof);
+        formData.append("file", images.incomeProof);
+
+        formData.append("remarks", values.remarks || "");
+
+        const res = await api.post("/proposal", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         if (!res.data.success)
           throw new Error("Error while submitting proposal");
       }
@@ -147,12 +203,42 @@ export default function Proposal() {
       } else {
         toast.error("Error while submitting proposal");
       }
+      console.log(error);
     }
   }
 
   const isHighlighted = (name: string) => {
     return rejectedFields.includes(name);
   };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const allowedTypes = ["image/jpeg", "image/png"];
+    const MAX_FILE_SIZE = 5120; // 5MB
+
+    if (!event.target.files) return;
+    const file = event.target.files[0];
+    const name = event.target.name;
+
+    if (!allowedTypes.includes(file.type)) {
+      return toast.error("Only JPEF, PNG images are allowed");
+    }
+
+    const fileSizeKiloBytes = file.size / 1024;
+    if (fileSizeKiloBytes > MAX_FILE_SIZE) {
+      return toast.error("File size is greater then 5MB");
+    }
+
+    setImages({
+      ...images,
+      [name]: file,
+    });
+  };
+
+  const editable = params.id
+    ? getProposal.data && getProposal.data.proposal.editEnable
+    : true;
 
   return (
     <div className="pb-10 bg-gray-100">
@@ -188,7 +274,11 @@ export default function Proposal() {
                         Title
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="Proposal Title" {...field} />
+                        <Input
+                          placeholder="Proposal Title"
+                          readOnly={!editable}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -212,6 +302,7 @@ export default function Proposal() {
                           onChange={field.onChange}
                           value={field.value}
                           placeholder="Please enter description"
+                          readOnly={!editable}
                         />
                       </FormControl>
                       <FormMessage />
@@ -233,7 +324,11 @@ export default function Proposal() {
                           Objective
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="Proposal Objective" {...field} />
+                          <Input
+                            placeholder="Proposal Objective"
+                            readOnly={!editable}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -255,6 +350,7 @@ export default function Proposal() {
                         <FormControl>
                           <Input
                             placeholder="Please enter duration"
+                            readOnly={!editable}
                             {...field}
                           />
                         </FormControl>
@@ -276,7 +372,11 @@ export default function Proposal() {
                           Budget
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="Please enter budget" {...field} />
+                          <Input
+                            placeholder="Please enter budget"
+                            readOnly={!editable}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -306,6 +406,7 @@ export default function Proposal() {
                           <Input
                             id="state"
                             placeholder="Please enter state"
+                            readOnly={!editable}
                             {...field}
                           />
                         </FormControl>
@@ -330,6 +431,7 @@ export default function Proposal() {
                           <Input
                             id="district"
                             placeholder="Please enter district"
+                            readOnly={!editable}
                             {...field}
                           />
                         </FormControl>
@@ -354,6 +456,7 @@ export default function Proposal() {
                           <Input
                             id="pincode"
                             placeholder="Please enter pincode"
+                            readOnly={!editable}
                             {...field}
                           />
                         </FormControl>
@@ -380,6 +483,7 @@ export default function Proposal() {
                           <Input
                             id="postOffice"
                             placeholder="Please enter post office"
+                            readOnly={!editable}
                             {...field}
                           />
                         </FormControl>
@@ -404,6 +508,7 @@ export default function Proposal() {
                           <Input
                             id="policeStation"
                             placeholder="Please enter police station"
+                            readOnly={!editable}
                             {...field}
                           />
                         </FormControl>
@@ -429,6 +534,7 @@ export default function Proposal() {
                         <Input
                           id="address"
                           placeholder="Please enter address"
+                          readOnly={!editable}
                           {...field}
                         />
                       </FormControl>
@@ -460,6 +566,7 @@ export default function Proposal() {
                             id="bankName"
                             placeholder="Please enter Bank Name"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -484,6 +591,7 @@ export default function Proposal() {
                             id="bankBranch"
                             placeholder="Please enter Bank Branch"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -510,6 +618,7 @@ export default function Proposal() {
                             id="ifsc"
                             placeholder="Please enter Bank IFSC"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -534,6 +643,7 @@ export default function Proposal() {
                             id="accountNumber"
                             placeholder="Please enter Account Number"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -565,6 +675,7 @@ export default function Proposal() {
                             id="incomeAmount"
                             placeholder="Please enter Income Amount"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -589,6 +700,7 @@ export default function Proposal() {
                             id="incomeSource"
                             placeholder="Please enter Income Source"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -620,6 +732,7 @@ export default function Proposal() {
                             id="ownerName"
                             placeholder="Please enter owner name"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -644,6 +757,7 @@ export default function Proposal() {
                             id="ownerNumber"
                             placeholder="Please enter Owner Number"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -668,6 +782,7 @@ export default function Proposal() {
                             id="ownerEmail"
                             placeholder="Please enter Owner Email"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -694,6 +809,7 @@ export default function Proposal() {
                             id="landLocation"
                             placeholder="Please enter land location"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -718,6 +834,7 @@ export default function Proposal() {
                             id="landArea"
                             placeholder="Please enter Land Area"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -741,7 +858,8 @@ export default function Proposal() {
                         <FormControl>
                           <Select
                             value={field.value}
-                            onValueChange={field.onChange}>
+                            onValueChange={field.onChange}
+                            disabled={!editable}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select land type" />
                             </SelectTrigger>
@@ -783,6 +901,7 @@ export default function Proposal() {
                             id="usage"
                             placeholder="Please enter Land Usage"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -807,6 +926,7 @@ export default function Proposal() {
                             id="ownershipStatus"
                             placeholder="Please enter Land Ownership Status"
                             {...field}
+                            readOnly={!editable}
                           />
                         </FormControl>
                         <FormMessage />
@@ -831,6 +951,7 @@ export default function Proposal() {
                           id="landDescription"
                           placeholder="Please enter Land Description"
                           {...field}
+                          readOnly={!editable}
                         />
                       </FormControl>
                       <FormMessage />
@@ -840,24 +961,117 @@ export default function Proposal() {
               </div>
             </div>
 
+            <div>
+              <h1 className="font-serif text-xl">Documents</h1>
+              <div className="p-4 space-y-4 bg-white border">
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col w-full space-y-2">
+                    <Label
+                      id="photo"
+                      className={cn(
+                        isHighlighted("photo") &&
+                          "bg-red-500 p-2 px-8 text-white font-bold"
+                      )}>
+                      Photo
+                    </Label>
+                    {editable && !params.id ? (
+                      <FileInput
+                        id="photo"
+                        name="photo"
+                        onChange={handleFileChange}
+                      />
+                    ) : (
+                      <Link
+                        to={
+                          getProposal?.data?.proposal?.documents?.photo
+                            ?.secure_url || "#"
+                        }
+                        target="_blank"
+                        id="photo"
+                        className={
+                          "border flex items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-all duration-300"
+                        }>
+                        <EyeIcon />
+                      </Link>
+                    )}
+                  </div>
+                  <div className="flex flex-col w-full space-y-2">
+                    <Label
+                      id="addressProof"
+                      className={cn(
+                        isHighlighted("addressProof") &&
+                          "bg-red-500 p-2 px-8 text-white font-bold"
+                      )}>
+                      Address Proof
+                    </Label>
+                    {editable && !params.id ? (
+                      <FileInput
+                        id="addressProof"
+                        name="addressProof"
+                        onChange={handleFileChange}
+                      />
+                    ) : (
+                      <Link
+                        to={
+                          getProposal?.data?.proposal?.documents?.addressProof
+                            ?.secure_url || "#"
+                        }
+                        id="addressProof"
+                        target="_blank"
+                        className={
+                          "border flex items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-all duration-300"
+                        }>
+                        <EyeIcon />
+                      </Link>
+                    )}
+                  </div>
+                  <div className="flex flex-col w-full space-y-2">
+                    <Label
+                      id="incomeProof"
+                      className={cn(
+                        isHighlighted("incomeProof") &&
+                          "bg-red-500 p-2 px-8 text-white font-bold"
+                      )}>
+                      Income Proof
+                    </Label>
+                    {editable && !params.id ? (
+                      <FileInput
+                        id="incomeProof"
+                        name="incomeProof"
+                        onChange={handleFileChange}
+                      />
+                    ) : (
+                      <Link
+                        to={
+                          getProposal?.data?.proposal?.documents?.incomeProof
+                            ?.secure_url || "#"
+                        }
+                        id="incomeProof"
+                        target="_blank"
+                        className={
+                          "border flex items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-all duration-300"
+                        }>
+                        <EyeIcon />
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="p-4 bg-white">
               <FormField
                 control={form.control}
                 name="remarks"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel
-                      className={cn(
-                        isHighlighted(field.name) &&
-                          "bg-red-500 p-2 px-8 text-white font-bold"
-                      )}>
-                      Remarks
-                    </FormLabel>
+                    <FormLabel>Remarks</FormLabel>
                     <FormControl>
                       <Textarea
                         id="remarks"
                         placeholder="Please enter Remarks"
                         {...field}
+                        readOnly={!editable}
                       />
                     </FormControl>
                     <FormMessage />

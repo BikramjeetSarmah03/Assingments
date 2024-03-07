@@ -9,10 +9,11 @@ import {
 } from "../controllers/proposal.controller";
 import { authorizeRoles } from "../middlewares";
 import { ROLE } from "@prisma/client";
+import { multiUpload } from "../utils/multer";
 
 const router = express.Router();
 
-router.post("/", createProposal);
+router.post("/", multiUpload("file", 3), createProposal);
 router.get("/", getProposals);
 router.get("/all", authorizeRoles(ROLE.ADMIN), getAllProposals);
 

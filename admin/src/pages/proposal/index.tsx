@@ -17,8 +17,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { proposalSchema } from "@/lib/form-schemas";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeftIcon } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { ChevronLeftIcon, EyeIcon } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -1162,6 +1162,84 @@ export default function Proposal() {
                     </FormItem>
                   )}
                 />
+              </div>
+            </div>
+
+            <div>
+              <h1 className="font-serif text-xl">Income Details</h1>
+              <div className="p-4 space-y-4 bg-white border">
+                <div className="flex items-center gap-4">
+                  <div className="w-full">
+                    <Label
+                      className={cn(
+                        isChecked("photo") &&
+                          "bg-red-500 p-2 px-8 text-white font-bold"
+                      )}>
+                      Photo
+                    </Label>
+                    <div className="flex items-center gap-4">
+                      <Link
+                        to={
+                          getProposal?.data?.proposal?.documents?.photo
+                            ?.secure_url || "#"
+                        }
+                        id="incomeProof"
+                        target="_blank"
+                        className={
+                          "border flex w-full items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-all duration-300"
+                        }>
+                        <EyeIcon />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="w-full">
+                    <Label
+                      className={cn(
+                        isChecked("addressProof") &&
+                          "bg-red-500 p-2 px-8 text-white font-bold"
+                      )}>
+                      Address Proof
+                    </Label>
+                    <div className="flex items-center gap-4">
+                      <Link
+                        to={
+                          getProposal?.data?.proposal?.documents?.addressProof
+                            ?.secure_url || "#"
+                        }
+                        id="incomeProof"
+                        target="_blank"
+                        className={
+                          "border flex w-full items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-all duration-300"
+                        }>
+                        <EyeIcon />
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="w-full">
+                    <Label
+                      className={cn(
+                        isChecked("incomeProof") &&
+                          "bg-red-500 p-2 px-8 text-white font-bold"
+                      )}>
+                      Income Proof
+                    </Label>
+                    <div className="flex items-center gap-4">
+                      <Link
+                        to={
+                          getProposal?.data?.proposal?.documents?.incomeProof
+                            ?.secure_url || "#"
+                        }
+                        id="incomeProof"
+                        target="_blank"
+                        className={
+                          "border flex w-full items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-all duration-300"
+                        }>
+                        <EyeIcon />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
