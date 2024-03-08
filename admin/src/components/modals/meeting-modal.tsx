@@ -27,6 +27,7 @@ export function MeetingModal() {
     email: "",
     date: "",
     time: "",
+    topic: "",
   });
 
   const getUsers = useQuery({
@@ -59,6 +60,7 @@ export function MeetingModal() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (formData.topic === "") return toast.error("Please enter a topic");
     if (formData.id === "") return toast.error("Please select an user");
     if (formData.date === "") return toast.error("Please select an date");
     if (formData.time === "")
@@ -94,6 +96,16 @@ export function MeetingModal() {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="topic">Topic</Label>
+            <Input
+              id="topic"
+              name="topic"
+              placeholder="Please enter a topic"
+              onChange={handleInputChange}
+            />
+          </div>
+
           <div className="flex flex-col gap-2">
             <Label id="user">Select User</Label>
             <select
@@ -125,7 +137,7 @@ export function MeetingModal() {
             <Input
               id="date"
               name="date"
-              type="date"
+              type="datetime-local"
               onChange={handleInputChange}
             />
           </div>
@@ -137,10 +149,10 @@ export function MeetingModal() {
               className="p-2 bg-white border rounded-md"
               onChange={handleInputChange}>
               <option value="">Duration</option>
+              <option value="5">5 min</option>
               <option value="15">15 min</option>
               <option value="30">30 min</option>
-              <option value="45">45 min</option>
-              <option value="60">1 hr</option>
+              <option value="40">40 min</option>
             </select>
           </div>
 
