@@ -3,8 +3,47 @@
   <head>
     <title>Welcome to our SaaS Service</title>
   </head>
+
+  <style>
+    body {
+      height: 100vh;
+      width: 100%;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: blue;
+      border-radius: 10px;
+      color: white;
+      transition: all 0.3s ease-in-out;
+      cursor: pointer;
+      font-size: 20px;
+    }
+    button:hover {
+      background: darkblue;
+    }
+
+    span {
+      font-weight: 500;
+      font-size: 20px;
+    }
+  </style>
   <body>
-    <h1>Hello <%= username %>,</h1>
-    <p>Welcome to our demo service. Your signup date is: <%= signupDate %></p>
+    <h1>Hello <% user %></h1>
+
+    <p>
+      Hope you're having a great day. I just wanted to remind you about our Zoom
+      meeting on <% time %>
+    </p>
+
+    <p>We'll be discussing <% topic %> for about <% duration %> m</p>
+
+    <p>Please click the button below to join the meeting</p>
+
+    <a href="<% joinUrl %>" target="_blank">Joining Link</a>
+
+    <p>Meeting Link: <span><% meetingLink %></span></p>
+    <p>Meeting Password: <span><% meetingPassword %></span></p>
   </body>
 </html>

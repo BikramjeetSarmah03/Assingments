@@ -1,42 +1,54 @@
 import { createTransport } from "nodemailer";
 import fs from "fs";
 import ejs from "ejs";
+import path from "path";
+import "dotenv/config";
 
-export const sendEmail = async () => {
-  const transporter = createTransport({
-    port: 587,
-    host: "live.smtp.mailtrap.io",
-    auth: {
-      user: "api",
-      pass: "bfea0eafc1d46e2bd192ae636623c8fe",
-    },
-    tls: {
-      ciphers: "SSLv3",
-    },
-  });
+type MailData = {
+  user: string;
+  time: string;
+  topic: string;
+  duration: string;
+  joinUrl: string;
+  meetingLink: string;
+  meetingPassword: string;
+  to: string;
+  subject: string;
+};
 
-  const templateString = fs.readFileSync(
-    "../../templates/meetingEmail.ejs",
-    "utf-8"
-  );
+export const sendEmail = async (data: MailData) => {
+  try {
+    const transporter = createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.SMTP_USER_NAME,
+        pass: process.env.SMTP_USER_PASS,
+      },
+    });
 
-  const data = {
-    username: "Bikram",
-    meetingUrl: "meeting url",
-  };
+    const templateString = fs.readFileSync(
+      path.join(__dirname, "../../templates/meetingEmail.ejs"),
+      "utf-8"
+    );
 
-  const html = ejs.render(templateString, data);
+    const html = ejs.render(templateString, data);
 
-  var mailOptions = {
-    from: "mailtrap@pms.netlify.app",
-    to: "9854bikram@gmail.com",
-    subject: "Nice Nodemailer test",
-    text: "Hey there, it’s our first message sent with Nodemailer 😉 ",
-    html: html,
-  };
+    var mailOptions = {
+      from: process.env.SMTP_USER_NAME,
+      to: data.to,
+      subject: data.subject,
+      html: html,
+    };
 
-  transporter.sendMail(mailOptions, function (err, info) {
-    if (err) console.log(err);
-    else console.log(info);
-  });
+    await new Promise((resolve, reject) => {
+      transporter.sendMail(mailOptions, function (err, info) {
+        if (err) reject(err);
+        resolve(info);
+      });
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };

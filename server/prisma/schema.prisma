@@ -86,6 +86,8 @@ model Meeting {
   meetingLink     String
   meetingDate     String
   meetingDuration String
+  meetingTopic    String
+  meetingStartUrl String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()

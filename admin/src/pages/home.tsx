@@ -64,7 +64,7 @@ export default function Home() {
         <div className="p-4 m-4 space-y-2 text-white bg-pink-500 border shadow">
           <h1 className="text-lg font-semibold">Meetings</h1>
           <div className="flex items-center justify-between">
-            <p className="text-2xl font-black">0</p>
+            <p className="text-2xl font-black">{data.meetings || 0}</p>
             <Button
               onClick={() => onOpen("meeting")}
               variant={"outline"}

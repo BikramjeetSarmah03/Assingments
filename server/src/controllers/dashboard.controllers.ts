@@ -12,6 +12,8 @@ export const getAdminDashboard = catchAsyncErrors(
       },
     });
 
+    const currentDate = new Date();
+
     const proposals = await db.proposal.findMany();
 
     const pendingProposals = proposals.filter(
@@ -24,6 +26,14 @@ export const getAdminDashboard = catchAsyncErrors(
       (prop) => prop.status === "REJECTED"
     );
 
+    const meetings = await db.meeting.count({
+      where: {
+        meetingDate: {
+          gte: currentDate.toISOString(),
+        },
+      },
+    });
+
     res.status(200).json({
       success: true,
       totalUsers,
@@ -31,6 +41,7 @@ export const getAdminDashboard = catchAsyncErrors(
       pendingProposals,
       approvedProposals,
       rejectedProposals,
+      meetings,
     });
   }
 );

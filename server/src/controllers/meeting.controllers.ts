@@ -6,15 +6,21 @@ import Base64 from "base-64";
 import axios from "axios";
 import { generatePassword } from "../utils";
 import { sendEmail } from "../utils/sendMail";
+import ErrorHandler from "../utils/errorHandler";
 
 export const createMeeting = catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { topic } = req.body;
-    console.log(req.body);
+    const { topic, email, date, time, id } = req.body;
 
-    await sendEmail();
+    const user = await db.user.findUnique({
+      where: {
+        id,
+        email,
+      },
+    });
 
-    return;
+    if (!user) return next(new ErrorHandler("User not found", 404));
+
     // get access token
     const accessToken = await getZoomAccessToken();
 
@@ -43,11 +49,35 @@ export const createMeeting = catchAsyncErrors(
       { headers: headers }
     );
 
+    const meeting = await db.meeting.create({
+      data: {
+        meetingDate: date,
+        meetingDuration: time,
+        meetingTopic: topic,
+        meetingLink: response.data.join_url,
+        meetingStartUrl: response.data.start_url,
+        recieverEmail: user.email,
+        senderEmail: req.user.email,
+      },
+    });
+
     // send emails
+    await sendEmail({
+      topic,
+      to: email,
+      duration: time,
+      time: date,
+      user: user.name || user.username,
+      subject: topic,
+      joinUrl: response.data.join_url,
+      meetingLink: response.data.start_url,
+      meetingPassword: meetPassword,
+    });
 
     res.status(201).json({
       success: true,
       message: "Meeting scheduled successfully",
+      meeting,
     });
   }
 );
@@ -61,7 +91,7 @@ const getZoomAccessToken = async () => {
 
     const params = {
       grant_type: "account_credentials",
-      account_id: "f5NvqV0iTqK8xP1UBB5ukw",
+      account_id: process.env.ZOOM_ACCOUNT_ID,
     };
 
     const response = await axios.post("https://zoom.us/oauth/token", params, {
@@ -77,7 +107,6 @@ const getZoomAccessToken = async () => {
       throw new Error("Failed to obtain Zoom access token");
     }
   } catch (error: any) {
-    console.log(error);
     console.error("Error obtaining Zoom access token:", error.message);
     throw error;
   }
