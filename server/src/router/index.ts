@@ -13,4 +13,8 @@ router.use("/api/v1/proposal", isAuthenticated, proposalRoutes);
 router.use("/api/v1", isAuthenticated, dashboardRoutes);
 router.use("/api/v1/meeting", isAuthenticated, meetingRoutes);
 
+router.all("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 export default router;
