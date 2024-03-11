@@ -56,7 +56,7 @@ export default function Home() {
       <section className="mx-4 space-y-4">
         <div className="p-2 border">
           <h1 className="p-2 text-2xl text-white bg-gradient-to-r from-yellow-500 to-yellow-400">
-            Pending Proposals
+            Proposals
           </h1>
           <DataTable
             data={data.proposals}

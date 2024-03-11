@@ -143,6 +143,7 @@ export default function Proposal() {
 
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       toast.success("Proposal Status Updated Successfully");
+      navigate("/");
     } catch (error) {
       if (isAxiosError(error)) {
         toast.error(error.response?.data.message);
@@ -1147,6 +1148,7 @@ export default function Proposal() {
                             id="landDescription"
                             placeholder="Please enter Land Description"
                             {...field}
+                            readOnly
                           />
                           {status === "REJECTED" && (
                             <Checkbox
@@ -1287,6 +1289,7 @@ export default function Proposal() {
                         id="remarks"
                         placeholder="Please enter Remarks"
                         {...field}
+                        readOnly={!getProposal.data?.proposal?.editEnable}
                       />
                     </FormControl>
                     <FormMessage />

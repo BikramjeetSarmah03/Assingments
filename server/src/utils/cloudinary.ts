@@ -15,6 +15,7 @@ export const uploadFile = async (filePath: string, folder: string) => {
 
     return res;
   } catch (error) {
+    console.log(error);
     return null;
   }
 };

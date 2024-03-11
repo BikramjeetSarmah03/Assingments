@@ -54,6 +54,15 @@ export const getUserDashboard = catchAsyncErrors(
       },
     });
 
+    const user = req.user;
+
+    if (user.role === ROLE.USER) {
+      proposals.map((proposal) => {
+        proposal.editEnable = proposal.status === "REJECTED" ? true : false;
+        proposal.deleteEnable = proposal.status !== "APPROVED" ? true : false;
+      });
+    }
+
     const pendingProposals = proposals.filter(
       (prop) => prop.status === "PENDING"
     ).length;
@@ -61,6 +70,7 @@ export const getUserDashboard = catchAsyncErrors(
     const approvedProposals = proposals.filter(
       (prop) => prop.status === "APPROVED"
     ).length;
+
     const rejectedProposals = proposals.filter(
       (prop) => prop.status === "REJECTED"
     ).length;

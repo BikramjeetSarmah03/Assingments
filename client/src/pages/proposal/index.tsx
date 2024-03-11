@@ -197,6 +197,7 @@ export default function Proposal() {
 
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       toast.success("Proposal Submitted Successfully");
+      navigate("/");
     } catch (error) {
       if (isAxiosError(error)) {
         toast.error(error.response?.data.message);
